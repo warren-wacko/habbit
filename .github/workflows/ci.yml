@@ -70,9 +70,10 @@ jobs:
         working-directory: api
         run: npm run test:api
 
+      # next typegen makes the types Next.js generates itself (they are not in git)
       - name: Web, type-check
         working-directory: web
-        run: npx tsc --noEmit
+        run: npm run typecheck
 
       - name: Web, lint
         working-directory: web
