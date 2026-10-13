@@ -1,12 +1,14 @@
 // The first-time tour: a few short screens that point out what the app can do, including the
 // things that are easy to miss. Kept short on purpose: a headline, one sentence and up to
-// three tips each.
+// three tips each. Some screens also show a pretend card with numbered markers.
 
 export type TourSlide = {
-  id: "tick" | "habits" | "days" | "menu" | "progress" | "you";
+  id: "tick" | "habits" | "page" | "days" | "menu" | "share" | "progress" | "you";
   title: string;
   body: string;
   tips: string[];
+  /** which pretend card to show under the text, if any */
+  sample?: "goal" | "page" | "share";
 };
 
 export const TOUR_SLIDES: TourSlide[] = [
@@ -17,18 +19,25 @@ export const TOUR_SLIDES: TourSlide[] = [
     tips: [
       "Finish every habit for a Perfect day",
       "The ring at the top shows how today is going",
-      "The share button turns a day into a picture",
     ],
   },
   {
     id: "habits",
     title: "Habits that fit you",
-    body: "Press New to add a habit with its own icon, colour and days of the week.",
+    body: "Press New to add a habit with its own icon, colour and days of the week. A habit with a goal, like 30 minutes, looks like this:",
+    sample: "goal",
     tips: [
-      "Set a goal like 30 minutes, then tap the circle to log it all, or use + and − (tap the number to type)",
+      "Use + and − to move the amount",
       "Group habits into Morning, Afternoon and Evening",
       "Pick a Quick start to save time",
     ],
+  },
+  {
+    id: "page",
+    title: "Every habit has its own page",
+    body: "Tap a habit's name to open it. It has a calendar, your streak history and your notes.",
+    sample: "page",
+    tips: ["Jot down how a day went, finished or not"],
   },
   {
     id: "days",
@@ -50,13 +59,17 @@ export const TOUR_SLIDES: TourSlide[] = [
     ],
   },
   {
+    id: "share",
+    title: "Share your day",
+    body: "Turn a day into a picture to post or send to a friend.",
+    sample: "share",
+    tips: ["On a Perfect day you can pick the message too"],
+  },
+  {
     id: "progress",
     title: "See how you're doing",
     body: "Progress shows week, month and year views. Tap a habit to open its own page.",
-    tips: [
-      "On a habit's page, tap any calendar day to read or write a note",
-      "Press Reorder on Today to rearrange your habits",
-    ],
+    tips: ["Press Reorder on Today to rearrange your habits"],
   },
   {
     id: "you",

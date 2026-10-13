@@ -103,12 +103,15 @@ export function CountControl({
           type="button"
           onClick={() => setTyping(true)}
           aria-label={`${shown} of ${target}${unitText}. Tap to type an amount`}
-          className="flex min-h-10 items-baseline justify-center gap-1.5 rounded-full text-inherit"
+          className="flex min-h-10 items-center justify-center rounded-full text-inherit"
         >
-          <span className="display num text-xl">{shown}</span>
-          <span className="text-sm font-semibold opacity-70">
-            / {target}
-            {unitText}
+          {/* the number and its unit share a baseline; the pair is centred beside "Log all" */}
+          <span className="flex items-baseline gap-1.5">
+            <span className="display num text-xl">{shown}</span>
+            <span className="text-sm font-semibold opacity-70">
+              / {target}
+              {unitText}
+            </span>
           </span>
         </button>
         {!h.doneOnDate && (

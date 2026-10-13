@@ -11,16 +11,21 @@ import {
   CheckIcon,
   CircleCheckIcon,
   EllipsisIcon,
+  NoteIcon,
+  ShareIcon,
   TargetIcon,
   UserIcon,
 } from "./icons";
 import { useModalDialog } from "./Sheet";
+import { TourSample } from "./TourSample";
 
 const SLIDE_ICON: Record<TourSlide["id"], React.ComponentType<{ size?: number; strokeWidth?: number }>> = {
   tick: CircleCheckIcon,
   habits: TargetIcon,
+  page: NoteIcon,
   days: CalendarDaysIcon,
   menu: EllipsisIcon,
+  share: ShareIcon,
   progress: ChartIcon,
   you: UserIcon,
 };
@@ -92,17 +97,20 @@ function TourBody({ close, markDone }: { close: () => void; markDone: boolean })
       </div>
 
       <div className="flex flex-1 flex-col justify-center gap-5" aria-live="polite">
-        <span
-          aria-hidden="true"
-          className="grid size-20 place-items-center rounded-3xl bg-volt text-on-volt"
-        >
-          <Icon size={38} strokeWidth={1.8} />
-        </span>
+        {!slide.sample && (
+          <span
+            aria-hidden="true"
+            className="grid size-20 place-items-center rounded-3xl bg-volt text-on-volt"
+          >
+            <Icon size={38} strokeWidth={1.8} />
+          </span>
+        )}
         <span className="caps text-xs text-muted">
           {step + 1} of {TOUR_SLIDES.length}
         </span>
-        <h2 className="display -mt-3 text-[1.875rem]">{slide.title}</h2>
+        <h2 className={`display text-[1.875rem] ${slide.sample ? "-mt-2" : "-mt-3"}`}>{slide.title}</h2>
         <p className="text-[1.0625rem] text-muted">{slide.body}</p>
+        {slide.sample && <TourSample kind={slide.sample} />}
         <ul className="flex flex-col gap-3">
           {slide.tips.map((tip) => (
             <li key={tip} className="flex items-start gap-3 text-[0.9375rem] font-semibold">

@@ -179,6 +179,13 @@
   --font-sans: var(--font-archivo);
 }
 
+/* the sign-in pages are always dark; make the page behind them dark too, so no light strip
+   shows when a phone keyboard shifts the view */
+html:has(.auth-page),
+body:has(.auth-page) {
+  background: #0e1111;
+}
+
 body {
   background: var(--ground);
   color: var(--ink);

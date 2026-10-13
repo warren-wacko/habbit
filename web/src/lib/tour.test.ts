@@ -2,8 +2,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { clampStep, TOUR_SLIDES } from "./tour";
 
-test("the tour stays short: at most six screens", () => {
-  assert.ok(TOUR_SLIDES.length >= 3 && TOUR_SLIDES.length <= 6);
+test("the tour stays short: at most eight screens", () => {
+  assert.ok(TOUR_SLIDES.length >= 3 && TOUR_SLIDES.length <= 8);
 });
 
 test("each screen is a headline, one sentence and at most three short tips", () => {
@@ -29,6 +29,11 @@ test("the main features are all mentioned somewhere in the tour", () => {
   ]) {
     assert.ok(text.includes(word), `the tour never mentions "${word}"`);
   }
+});
+
+test("each pretend card is used by exactly one screen", () => {
+  const kinds = TOUR_SLIDES.flatMap((s) => (s.sample ? [s.sample] : []));
+  assert.deepEqual([...kinds].sort(), ["goal", "page", "share"]);
 });
 
 test("clampStep keeps the step within the screens", () => {

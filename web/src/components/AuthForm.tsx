@@ -48,7 +48,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   }
 
   return (
-    <div className="min-h-dvh bg-[#0e1111] text-[#f1f4ee]">
+    <div className="auth-page min-h-dvh bg-[#0e1111] text-[#f1f4ee]">
       <main className="mx-auto flex min-h-dvh w-full max-w-xl flex-col">
         <div className="flex flex-1 flex-col gap-[22px] px-6 pb-6 pt-9">
           <Wordmark size={22} variant="ink" />
