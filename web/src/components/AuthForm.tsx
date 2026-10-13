@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -28,6 +28,18 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const [password, setPassword] = useState("");
 
   const isLogin = mode === "login";
+
+  // The sign-in pages are always dark, so the page behind them must be too (otherwise a light
+  // strip shows when a phone keyboard shifts the view). The flag is set only while this page
+  // is on screen: after sign-in the app keeps it hidden rather than removed, and its cleanup
+  // still runs then.
+  useEffect(() => {
+    const root = document.documentElement;
+    root.dataset.auth = "";
+    return () => {
+      delete root.dataset.auth;
+    };
+  }, []);
 
   const auth = useMutation({
     mutationFn: () =>

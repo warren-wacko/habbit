@@ -180,9 +180,10 @@
 }
 
 /* the sign-in pages are always dark; make the page behind them dark too, so no light strip
-   shows when a phone keyboard shifts the view */
-html:has(.auth-page),
-body:has(.auth-page) {
+   shows when a phone keyboard shifts the view. AuthForm sets data-auth on <html> only while
+   a sign-in page is on screen. */
+html[data-auth],
+html[data-auth] body {
   background: #0e1111;
 }
 
