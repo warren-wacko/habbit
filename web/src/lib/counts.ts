@@ -64,3 +64,27 @@ export function canCountAsDone(h: {
 export function goalChange(current: number, entered: number): "raise" | "lower" | "same" {
   return entered > current ? "raise" : entered < current ? "lower" : "same";
 }
+
+/**
+ * How much the + and - buttons add for a goal of this size, so that "30 minutes" does not
+ * take thirty taps: small goals move by 1, bigger goals by bigger steps.
+ */
+export function stepFor(target: number): number {
+  if (target <= 12) return 1; // 8 glasses, 5 km
+  if (target <= 40) return 5; // 30 minutes, 20 reps
+  if (target <= 120) return 10; // 60 minutes
+  if (target <= 600) return 50; // 300 pages
+  if (target <= 1200) return 100;
+  if (target <= 3000) return 250; // 2000 ml
+  return 1000; // 8000 steps
+}
+
+/** The quick-add amounts in the type-an-amount sheet: one, two and three steps */
+export function amountChips(step: number): number[] {
+  return [step, step * 2, step * 3];
+}
+
+/** Move an amount one step up or down, never below 0 or above the cap */
+export function nudge(amount: number, direction: 1 | -1, step: number, cap: number): number {
+  return Math.min(cap, Math.max(0, amount + direction * step));
+}

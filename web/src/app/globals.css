@@ -584,8 +584,11 @@ html {
   }
   .habit .step {
     display: grid;
-    width: 2.75rem;
+    min-width: 2.75rem;
     height: 2.75rem;
+    padding-inline: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 800;
     flex: none;
     place-items: center;
     border-radius: 9999px;
@@ -1106,6 +1109,18 @@ html {
     background: var(--track);
     animation: skeleton-pulse 1.4s ease-in-out infinite;
   }
+  .loader-square {
+    animation: loader-fade var(--loader-cycle, 1200ms) ease-in infinite;
+  }
+  @keyframes loader-fade {
+    0% {
+      opacity: 1;
+    }
+    45%,
+    100% {
+      opacity: 0.2;
+    }
+  }
   @keyframes skeleton-pulse {
     50% {
       opacity: 0.5;
@@ -1120,5 +1135,13 @@ html {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
     transition-delay: 0ms !important;
+  }
+  /* an endless animation squeezed to a blink would flicker: hold still instead */
+  .loader-square {
+    animation: none;
+    opacity: 0.6;
+  }
+  .skeleton {
+    animation: none;
   }
 }

@@ -15,6 +15,7 @@ import { displayName, initialOf } from "@/lib/profile";
 import { useMe, useUpdateProfile } from "@/lib/useMe";
 import { useOverall } from "@/lib/useOverall";
 import { Avatar } from "./Avatar";
+import { Loader } from "./Loader";
 import { ChangePasswordForm } from "./ChangePasswordForm";
 import { DeleteAccountForm } from "./DeleteAccountSection";
 import { HabitTile } from "./habitIcons";
@@ -232,7 +233,11 @@ export function YouView() {
         <span id="archived-heading" className="caps mb-1.5 text-xs text-muted">
           Archived habits · {archived.data?.habits.length ?? 0}
         </span>
-        {archived.isPending && <p className="py-3 text-sm text-muted">Loading...</p>}
+        {archived.isPending && (
+          <div className="flex justify-center py-4">
+            <Loader size={28} label="Loading archived habits" />
+          </div>
+        )}
         {archived.isError && (
           <p role="alert" className="alert my-2">
             {archived.error.message}

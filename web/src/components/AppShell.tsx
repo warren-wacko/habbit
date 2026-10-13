@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { applyAccent } from "@/lib/accent";
 import { useRequireAuth } from "@/lib/useRequireAuth";
+import { Loader } from "./Loader";
 import { Tour } from "./Tour";
 import { BottomNav } from "./BottomNav";
 
@@ -25,9 +26,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   if (isPending || error) {
     return (
-      <p role="status" className="grid min-h-dvh place-items-center text-muted">
-        Loading...
-      </p>
+      <div className="grid min-h-dvh place-items-center">
+        <Loader size={64} />
+      </div>
     );
   }
 

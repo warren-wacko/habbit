@@ -1,6 +1,16 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { afterProgress, amountCap, canCountAsDone, effectiveTarget, goalChange, isCounted } from "./counts";
+import {
+  afterProgress,
+  amountCap,
+  amountChips,
+  canCountAsDone,
+  effectiveTarget,
+  goalChange,
+  isCounted,
+  nudge,
+  stepFor,
+} from "./counts";
 
 const day = (over: Partial<Parameters<typeof afterProgress>[0]> = {}) => ({
   doneOnDate: false,
@@ -65,4 +75,41 @@ test("goalChange tells a raise from a lowering", () => {
   assert.equal(goalChange(30, 40), "raise");
   assert.equal(goalChange(30, 10), "lower");
   assert.equal(goalChange(30, 30), "same");
+});
+
+test("the step grows with the goal, so 30 minutes is not thirty taps", () => {
+  assert.equal(stepFor(1), 1);
+  assert.equal(stepFor(8), 1); // glasses
+  assert.equal(stepFor(12), 1);
+  assert.equal(stepFor(13), 5);
+  assert.equal(stepFor(30), 5); // minutes
+  assert.equal(stepFor(40), 5);
+  assert.equal(stepFor(60), 10);
+  assert.equal(stepFor(120), 10);
+  assert.equal(stepFor(300), 50);
+  assert.equal(stepFor(1000), 100);
+  assert.equal(stepFor(2000), 250);
+  assert.equal(stepFor(8000), 1000); // steps
+  assert.equal(stepFor(10000), 1000);
+});
+
+test("a goal can be reached in a handful of taps at any size", () => {
+  for (let goal = 1; goal <= 10000; goal += goal < 200 ? 1 : 37) {
+    const taps = Math.ceil(goal / stepFor(goal));
+    assert.ok(taps <= 12, `${goal} would take ${taps} taps`);
+  }
+});
+
+test("the quick-add chips are one, two and three steps", () => {
+  assert.deepEqual(amountChips(1), [1, 2, 3]);
+  assert.deepEqual(amountChips(5), [5, 10, 15]);
+  assert.deepEqual(amountChips(50), [50, 100, 150]);
+});
+
+test("nudging moves by a step and stays within 0 and the cap", () => {
+  assert.equal(nudge(10, 1, 5, 300), 15);
+  assert.equal(nudge(10, -1, 5, 300), 5);
+  assert.equal(nudge(3, -1, 5, 300), 0); // never below zero
+  assert.equal(nudge(298, 1, 5, 300), 300); // never above the cap
+  assert.equal(nudge(0, 1, 1, 80), 1);
 });

@@ -25,7 +25,7 @@ export const TOUR_SLIDES: TourSlide[] = [
     title: "Habits that fit you",
     body: "Press New to add a habit with its own icon, colour and days of the week.",
     tips: [
-      "Set a goal like 8 glasses or 20 pages, then use + and − (tap the number to type it)",
+      "Set a goal like 30 minutes, then tap the circle to log it all, or use + and − (tap the number to type)",
       "Group habits into Morning, Afternoon and Evening",
       "Pick a Quick start to save time",
     ],

@@ -107,7 +107,7 @@ export function HabitCard({ habit: h, date, today, dates, skips, created, streak
       </button>
 
       {isCounted(h) && !skipped && !restIdle && (
-        <CountControl key={`${h.id}-${date}`} habit={h} date={date} />
+        <CountControl key={`${h.id}-${date}`} habit={h} date={date} onFull={onToggle} />
       )}
     </li>
   );

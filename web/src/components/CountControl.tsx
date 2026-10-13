@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { amountCap, effectiveTarget } from "@/lib/counts";
+import { amountCap, amountChips, effectiveTarget, nudge, stepFor } from "@/lib/counts";
 import { useSetProgress } from "@/lib/habits";
 import type { Habit } from "@/lib/types";
 import { MinusIcon, PlusIcon } from "./icons";
@@ -13,11 +13,20 @@ const SAVE_DELAY = 500; // wait for a pause in tapping, then send one request
  * The − / amount / + row of a counted habit. Taps show at once and are saved after a short
  * pause, so a run of taps is one request. Tap the number to type an amount instead.
  */
-export function CountControl({ habit: h, date }: { habit: Habit; date: string }) {
+export function CountControl({
+  habit: h,
+  date,
+  onFull,
+}: {
+  habit: Habit;
+  date: string;
+  onFull: () => void; // log the whole goal at once
+}) {
   const setProgress = useSetProgress();
   const target = effectiveTarget(h);
   const saved = h.amountOnDate ?? (h.doneOnDate ? target : 0);
   const cap = amountCap(Math.max(h.target, target));
+  const step = stepFor(target);
 
   const [draft, setDraft] = useState<number | null>(null);
   const [typing, setTyping] = useState(false);
@@ -65,32 +74,54 @@ export function CountControl({ habit: h, date }: { habit: Habit; date: string })
     timer.current = setTimeout(flush, SAVE_DELAY);
   }
 
+  function logAll() {
+    // drop any tap still waiting to be saved, so it cannot overwrite the full goal
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = null;
+    pending.current = null;
+    setDraft(null);
+    onFull();
+  }
+
   const shown = draft ?? saved;
   const unit = h.unit ?? "";
+  const unitText = unit ? ` ${unit}` : "";
 
   return (
     <div className="flex basis-full items-center gap-2 pb-1 pl-1.5 pr-2 pt-0.5">
       <button
         type="button"
         className="step"
-        aria-label={`One less ${h.name}`}
+        aria-label={`Take away ${step}${unitText} from ${h.name}`}
         disabled={shown <= 0}
-        onClick={() => set(shown - 1)}
+        onClick={() => set(nudge(shown, -1, step, cap))}
       >
-        <MinusIcon size={18} strokeWidth={2.2} />
+        {step === 1 ? <MinusIcon size={18} strokeWidth={2.2} /> : `−${step}`}
       </button>
-      <button
-        type="button"
-        onClick={() => setTyping(true)}
-        aria-label={`${shown} of ${target} ${unit}. Tap to type an amount`}
-        className="flex min-h-10 flex-1 items-baseline justify-center gap-1.5 rounded-full text-inherit"
-      >
-        <span className="display num text-xl">{shown}</span>
-        <span className="text-sm font-semibold opacity-70">
-          / {target}
-          {unit && ` ${unit}`}
-        </span>
-      </button>
+      <div className="flex min-w-0 flex-1 items-center justify-center gap-2">
+        <button
+          type="button"
+          onClick={() => setTyping(true)}
+          aria-label={`${shown} of ${target}${unitText}. Tap to type an amount`}
+          className="flex min-h-10 items-baseline justify-center gap-1.5 rounded-full text-inherit"
+        >
+          <span className="display num text-xl">{shown}</span>
+          <span className="text-sm font-semibold opacity-70">
+            / {target}
+            {unitText}
+          </span>
+        </button>
+        {!h.doneOnDate && (
+          <button
+            type="button"
+            onClick={logAll}
+            aria-label={`Log the whole goal for ${h.name}: ${target}${unitText}`}
+            className="chip min-h-8 shrink-0 px-2.5 text-xs"
+          >
+            Log all
+          </button>
+        )}
+      </div>
       <span className="sr-only" role="status">
         {shown} of {target}
         {unit && ` ${unit}`}
@@ -98,11 +129,11 @@ export function CountControl({ habit: h, date }: { habit: Habit; date: string })
       <button
         type="button"
         className="step"
-        aria-label={`One more ${h.name}`}
+        aria-label={`Add ${step}${unitText} to ${h.name}`}
         disabled={shown >= cap}
-        onClick={() => set(shown + 1)}
+        onClick={() => set(nudge(shown, 1, step, cap))}
       >
-        <PlusIcon size={18} strokeWidth={2.2} />
+        {step === 1 ? <PlusIcon size={18} strokeWidth={2.2} /> : `+${step}`}
       </button>
 
       <Sheet open={typing} onClose={() => setTyping(false)} title={h.name}>
@@ -111,6 +142,7 @@ export function CountControl({ habit: h, date }: { habit: Habit; date: string })
           cap={cap}
           target={target}
           unit={unit}
+          step={step}
           onSave={(amount) => {
             set(amount);
             flush();
@@ -127,12 +159,14 @@ function AmountForm({
   cap,
   target,
   unit,
+  step,
   onSave,
 }: {
   initial: number;
   cap: number;
   target: number;
   unit: string;
+  step: number;
   onSave: (amount: number) => void;
 }) {
   const [value, setValue] = useState(String(initial));
@@ -170,12 +204,15 @@ function AmountForm({
           </p>
         )}
       </div>
-      <div className="flex gap-2">
-        {[1, 5, 10].map((by) => (
-          <button key={by} type="button" className="chip flex-1" onClick={() => add(by)}>
+      <div className="flex flex-wrap gap-2">
+        {amountChips(step).map((by) => (
+          <button key={by} type="button" className="chip" onClick={() => add(by)}>
             +{by}
           </button>
         ))}
+        <button type="button" className="chip" onClick={() => setValue(String(Math.min(cap, target)))}>
+          Full goal ({target})
+        </button>
       </div>
       <button type="submit" className="btn btn-volt" disabled={!valid}>
         Save

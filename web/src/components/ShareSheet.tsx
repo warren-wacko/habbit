@@ -194,12 +194,12 @@ function ShareBody({ date, today, habits }: Omit<Props, "open" | "onClose">) {
           {layout === "poster" && perfectDay && (
             <fieldset>
               <legend className="legend mb-2 text-[0.6875rem]">Message</legend>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 gap-2">
                 {PERFECT_MESSAGES.map((m) => (
                   <button
                     key={m.key}
                     type="button"
-                    className="opt"
+                    className="opt !h-auto min-h-10 px-2 py-2 leading-tight"
                     aria-pressed={message === m.key}
                     onClick={() => {
                       setMessage(m.key);
