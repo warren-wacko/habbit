@@ -1,0 +1,101 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           Int       @id @default(autoincrement())
+  email        String    @unique
+  passwordHash String
+  createdAt    DateTime  @default(now())
+  habits       Habit[]
+  // how the user shows up on the You screen: all optional, the email's initial is the fallback
+  nickname     String?
+  avatarIcon   String?
+  avatarColor  String    @default("volt")
+  // the colour the whole app uses for its accent (ticks, buttons, charts)
+  accent       String    @default("volt")
+  // set when the user finishes or skips the first-time tour: null means they have not seen it
+  onboardedAt  DateTime?
+}
+
+model Habit {
+  id           Int             @id @default(autoincrement())
+  name         String
+  // palette key (yellow, coral, ...) and an optional emoji, both chosen by the user
+  color        String          @default("yellow")
+  icon         String?
+  // days of the week the habit is scheduled, as a bitmask: bit 0 = Monday ... bit 6 = Sunday
+  scheduleDays Int             @default(127)
+  // how many to reach per day (1 = a plain tick) and an optional label such as "glasses"
+  target       Int             @default(1)
+  unit         String?
+  // where it sits in the list (lowest first; ties go by id), and when in the day it belongs
+  sortOrder    Int             @default(0)
+  timeOfDay    String          @default("anytime")
+  // set when the user archives the habit: hidden from Today and Progress, history kept
+  archivedAt   DateTime?
+  userId       Int
+  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime        @default(now())
+  logs         HabitLog[]
+  skips        HabitSkip[]
+  progress     HabitProgress[]
+  notes        HabitNote[]
+
+  @@index([userId])
+}
+
+model HabitLog {
+  id      Int      @id @default(autoincrement())
+  habitId Int
+  habit   Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  date    DateTime @db.Date
+
+  @@unique([habitId, date])
+}
+
+// A day the user chose to skip: it does not break the streak or count against the rate
+model HabitSkip {
+  id      Int      @id @default(autoincrement())
+  habitId Int
+  habit   Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  date    DateTime @db.Date
+
+  @@unique([habitId, date])
+}
+
+// How much of a counted habit was done on a day. A day is done when its HabitLog row
+// exists; `target` is the target that applied when the day was reached, so raising the
+// habit's target later does not change a finished day.
+model HabitProgress {
+  id      Int      @id @default(autoincrement())
+  habitId Int
+  habit   Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  date    DateTime @db.Date
+  amount  Int
+  target  Int
+
+  @@unique([habitId, date])
+}
+
+// A short note on one day of a habit. It lives apart from the check-in, so un-ticking a
+// day never loses it, and a day that was missed or skipped can have one too.
+model HabitNote {
+  id      Int      @id @default(autoincrement())
+  habitId Int
+  habit   Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  date    DateTime @db.Date
+  text    String
+
+  @@unique([habitId, date])
+}

@@ -1,0 +1,1124 @@
+@import "tailwindcss";
+
+/*
+  Habbit, "tracker" direction: a training log for habits.
+  Volt (lime) means DONE and is only ever a fill under black text. Ultraviolet
+  marks data: partial days, links, deltas. A done habit flips to an ink card
+  (a paper card in dark mode). Red appears only for destructive actions and errors.
+*/
+:root {
+  color-scheme: light;
+
+  --ground: #f2f3ef; /* page background */
+  --surface: #ffffff; /* cards, inputs, nav */
+  --ink: #0e1111; /* text, primary button, done card */
+  --muted: #5c6461; /* secondary text */
+  --line: #e1e4de; /* hairlines, card borders */
+  --strong: #c9cec6; /* empty check, dashed rest, ghost borders */
+  --track: #e7eae3; /* progress tracks, segmented bg, rest tile */
+  --ring: #868e8a; /* the border of an empty tick and of text fields: 3:1 on cards and page */
+
+  /* the score card: always dark in light mode */
+  --hero: #0e1111;
+  --hero-border: #0e1111;
+  --hero-fg: #f1f4ee;
+  --hero-muted: #9aa39e;
+  --hero-track: #2a302d;
+
+  /* a completed habit card */
+  --done-bg: #0e1111;
+  --done-fg: #f1f4ee;
+  --done-muted: #9aa39e;
+
+  --volt: #ccf33c;
+  --on-volt: #0e1111;
+  --uv: #6b4eff;
+  --uv-hover: #5235e0;
+  --uv-soft: #eeeaff;
+  --danger: #b42318;
+  --danger-line: #d92d20;
+  --danger-bg: #fde7e5;
+
+  --heat-0: #e7eae3;
+  --heat-1: #e5f5a8;
+  --heat-2: #b8db2c;
+  --heat-3: #7fa10e;
+
+  /* habit colours: tile fills, always under dark ink */
+  --h-volt: #ccf33c;
+  --h-aqua: #6ee0e0;
+  --h-sky: #9db8ff;
+  --h-violet: #c2a8ff;
+  --h-rose: #ff9db8;
+  --h-sand: #f4cb74;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Dark: follows the device unless the user picked Light, or picked Dark explicitly */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --ground: #0b0d0c;
+    --surface: #161a18;
+    --ink: #f1f4ee;
+    --muted: #9aa39e;
+    --line: #252b28;
+    --strong: #3a423e;
+    --track: #252b28;
+    --ring: #707975;
+    --hero: #161a18;
+    --hero-border: #252b28;
+    --done-bg: #f1f4ee;
+    --done-fg: #0e1111;
+    --done-muted: #5c6461;
+    --uv: #ae9cff;
+    --uv-hover: #c4b7ff;
+    --uv-soft: #251e47;
+    --danger: #ff7a6e;
+    --danger-line: #ff7a6e;
+    --danger-bg: #3a1d1a;
+    --heat-0: #1f2421;
+    --heat-1: #3d4a1c;
+    --heat-2: #8db02a;
+    --heat-3: #ccf33c;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ground: #0b0d0c;
+  --surface: #161a18;
+  --ink: #f1f4ee;
+  --muted: #9aa39e;
+  --line: #252b28;
+  --strong: #3a423e;
+  --track: #252b28;
+  --ring: #707975;
+  --hero: #161a18;
+  --hero-border: #252b28;
+  --done-bg: #f1f4ee;
+  --done-fg: #0e1111;
+  --done-muted: #5c6461;
+  --uv: #ae9cff;
+  --uv-hover: #c4b7ff;
+  --uv-soft: #251e47;
+  --danger: #ff7a6e;
+  --danger-line: #ff7a6e;
+  --danger-bg: #3a1d1a;
+  --heat-0: #1f2421;
+  --heat-1: #3d4a1c;
+  --heat-2: #8db02a;
+  --heat-3: #ccf33c;
+}
+
+/* The colour theme: a main colour (the green on ticks, buttons, the ring, charts) and a partner
+   (the purple on links, "Partial" bars and note tags). Volt & Violet is the default and needs
+   no rule. The partner is deep in light mode and light in dark mode so it stays readable as text. */
+:root {
+  --pair-volt-l: #6b4eff;
+  --pair-volt-d: #ae9cff;
+  --pair-aqua-l: #b01e96;
+  --pair-aqua-d: #f0a0e0;
+  --pair-sky-l: #a14a05;
+  --pair-sky-d: #fbbf77;
+  --pair-violet-l: #3a7a05;
+  --pair-violet-d: #b6e36a;
+  --pair-rose-l: #0b6e66;
+  --pair-rose-d: #6ee7d8;
+  --pair-sand-l: #1d4ed8;
+  --pair-sand-d: #9db8ff;
+}
+:root[data-accent="aqua"] { --accent: var(--h-aqua); --pair-l: var(--pair-aqua-l); --pair-d: var(--pair-aqua-d); }
+:root[data-accent="sky"] { --accent: var(--h-sky); --pair-l: var(--pair-sky-l); --pair-d: var(--pair-sky-d); }
+:root[data-accent="violet"] { --accent: var(--h-violet); --pair-l: var(--pair-violet-l); --pair-d: var(--pair-violet-d); }
+:root[data-accent="rose"] { --accent: var(--h-rose); --pair-l: var(--pair-rose-l); --pair-d: var(--pair-rose-d); }
+:root[data-accent="sand"] { --accent: var(--h-sand); --pair-l: var(--pair-sand-l); --pair-d: var(--pair-sand-d); }
+:root[data-accent] {
+  --volt: var(--accent);
+  --uv: var(--pair-l);
+  --uv-hover: color-mix(in oklab, var(--pair-l) 80%, #000);
+  --uv-soft: color-mix(in oklab, var(--pair-l) 12%, var(--surface));
+  --heat-1: color-mix(in oklab, var(--accent) 32%, var(--heat-0));
+  --heat-2: color-mix(in oklab, var(--accent) 72%, var(--heat-0));
+  --heat-3: var(--accent);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"])[data-accent] {
+    --uv: var(--pair-d);
+    --uv-hover: color-mix(in oklab, var(--pair-d) 80%, #fff);
+    --uv-soft: color-mix(in oklab, var(--pair-d) 16%, var(--surface));
+  }
+}
+:root[data-theme="dark"][data-accent] {
+  --uv: var(--pair-d);
+  --uv-hover: color-mix(in oklab, var(--pair-d) 80%, #fff);
+  --uv-soft: color-mix(in oklab, var(--pair-d) 16%, var(--surface));
+}
+
+@theme inline {
+  --color-ground: var(--ground);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-strong: var(--strong);
+  --color-track: var(--track);
+  --color-hero: var(--hero);
+  --color-hero-fg: var(--hero-fg);
+  --color-hero-muted: var(--hero-muted);
+  --color-hero-track: var(--hero-track);
+  --color-done-bg: var(--done-bg);
+  --color-done-fg: var(--done-fg);
+  --color-volt: var(--volt);
+  --color-on-volt: var(--on-volt);
+  --color-uv: var(--uv);
+  --color-uv-soft: var(--uv-soft);
+  --color-danger: var(--danger);
+  --color-danger-line: var(--danger-line);
+  --color-danger-bg: var(--danger-bg);
+  --font-sans: var(--font-archivo);
+}
+
+body {
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--font-archivo), system-ui, sans-serif;
+  accent-color: var(--ink);
+  caret-color: var(--ink);
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  background: var(--volt);
+  color: var(--on-volt);
+}
+
+/* in the base layer so utilities and component classes can override link colour */
+@layer base {
+  a {
+    color: var(--uv);
+  }
+  a:hover {
+    color: var(--uv-hover);
+  }
+}
+
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+input:focus-visible {
+  outline: none;
+}
+
+html {
+  scrollbar-color: var(--strong) transparent;
+}
+
+/* ---------- type ---------- */
+.display {
+  font-stretch: 125%;
+  font-weight: 800;
+  line-height: 1;
+}
+.caps {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+@layer components {
+  /* ---------- buttons ---------- */
+  .btn {
+    display: inline-flex;
+    height: 3.25rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    border-radius: 9999px;
+    background: var(--ink);
+    padding-inline: 1.25rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--ground);
+    text-decoration: none;
+    transition:
+      opacity 150ms,
+      transform 150ms var(--ease-out);
+  }
+  .btn:hover:not(:disabled) {
+    color: var(--ground);
+    opacity: 0.9;
+  }
+  .btn:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+  .btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+  }
+  .btn-volt {
+    background: var(--volt);
+    color: var(--on-volt);
+  }
+  .btn-volt:hover:not(:disabled) {
+    color: var(--on-volt);
+  }
+  .btn-sm {
+    height: 2.5rem;
+    padding-inline: 1rem;
+    font-size: 0.875rem;
+  }
+
+  .btn-ghost {
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    border-radius: 9999px;
+    border: 1px solid var(--strong);
+    background: transparent;
+    padding-inline: 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--ink);
+    text-decoration: none;
+    transition: background-color 150ms;
+  }
+  .btn-ghost:hover:not(:disabled) {
+    background: var(--track);
+    color: var(--ink);
+  }
+  .btn-ghost:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+  }
+  .btn-quiet {
+    border-color: transparent;
+  }
+
+  .btn-danger {
+    display: inline-flex;
+    height: 3rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    background: var(--danger-bg);
+    padding-inline: 1.25rem;
+    font-weight: 600;
+    color: var(--danger);
+    transition: opacity 150ms;
+  }
+  .btn-danger:hover:not(:disabled) {
+    opacity: 0.85;
+  }
+  .btn-danger:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+  }
+
+  .icon-btn {
+    display: grid;
+    width: 2.75rem;
+    height: 2.75rem;
+    flex: none;
+    place-items: center;
+    border-radius: 9999px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+    transition:
+      background-color 150ms,
+      transform 150ms var(--ease-out);
+  }
+  .icon-btn:hover:not(:disabled) {
+    background: var(--track);
+    color: var(--ink);
+  }
+  .icon-btn:active:not(:disabled) {
+    transform: scale(0.94);
+  }
+  .icon-btn:disabled {
+    color: var(--strong);
+    cursor: not-allowed;
+  }
+  .icon-btn.bare {
+    border: 0;
+    background: transparent;
+  }
+  .icon-btn.bare:hover:not(:disabled) {
+    background: var(--track);
+  }
+
+  /* ---------- segmented control ---------- */
+  .seg {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    padding: 0.25rem;
+    border-radius: 9999px;
+    background: var(--track);
+  }
+  .seg button {
+    height: 2.5rem;
+    border-radius: 9999px;
+    background: transparent;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--ink);
+    transition:
+      background-color 160ms var(--ease-out),
+      color 160ms var(--ease-out);
+  }
+  .seg button[aria-selected="true"],
+  .seg button[aria-checked="true"],
+  .seg button[aria-pressed="true"] {
+    background: var(--ink);
+    color: var(--ground);
+    font-weight: 700;
+  }
+
+  /* ---------- form fields ---------- */
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+  .field > label,
+  .legend {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .input {
+    width: 100%;
+    height: 3.25rem;
+    border-radius: 0.875rem;
+    border: 1px solid var(--ring);
+    background: var(--surface);
+    padding-inline: 1rem;
+    font-size: 1rem; /* 16px keeps iOS from zooming the page on focus */
+    color: var(--ink);
+    transition: border-color 150ms;
+  }
+  .input::placeholder {
+    color: var(--muted);
+  }
+  .input:hover {
+    border-color: var(--muted);
+  }
+  .input:focus-visible {
+    border: 2px solid var(--ink);
+    padding-inline: calc(1rem - 1px);
+  }
+  .hint {
+    font-size: 0.8125rem;
+    color: var(--muted);
+  }
+  .alert {
+    border-radius: 0.75rem;
+    background: var(--danger-bg);
+    padding: 0.625rem 0.875rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--danger);
+  }
+  .notice {
+    border-radius: 0.75rem;
+    background: var(--volt);
+    padding: 0.625rem 0.875rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--on-volt);
+  }
+
+  /* ---------- surfaces ---------- */
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    border-radius: 1.5rem;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    padding: 1.25rem;
+  }
+  .hero {
+    border-radius: 1.625rem;
+    border: 1px solid var(--hero-border);
+    background: var(--hero);
+    color: var(--hero-fg);
+    padding: 1.25rem;
+  }
+  .hero .lbl {
+    color: var(--hero-muted);
+  }
+  .tile {
+    display: grid;
+    flex: none;
+    place-items: center;
+    color: #0e1111;
+  }
+  .badge-volt {
+    align-self: flex-start;
+    border-radius: 9999px;
+    background: var(--volt);
+    padding: 0.25rem 0.625rem;
+    font-size: 0.6875rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--on-volt);
+    animation: badge-pop 420ms var(--ease-out);
+  }
+  @keyframes badge-pop {
+    from {
+      transform: scale(0.8);
+      opacity: 0;
+    }
+  }
+  .delta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    border-radius: 9999px;
+    background: var(--uv-soft);
+    padding: 0.375rem 0.625rem;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: var(--uv);
+  }
+  .ring-progress {
+    transition: stroke-dasharray 400ms var(--ease-out);
+  }
+
+  /* ---------- the last-7-days strip ---------- */
+  .day {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.375rem;
+    border-radius: 1rem;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    padding-block: 0.5rem;
+    color: var(--ink);
+    transition:
+      background-color 160ms var(--ease-out),
+      transform 150ms var(--ease-out);
+  }
+  .day:active:not(:disabled) {
+    transform: scale(0.96);
+  }
+  .day:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+  .day .bar {
+    display: flex;
+    width: 0.625rem;
+    height: 2.75rem;
+    align-items: flex-end;
+    overflow: hidden;
+    border-radius: 9999px;
+    background: var(--track);
+  }
+  .day .bar > span {
+    width: 100%;
+    border-radius: 9999px;
+    background: var(--uv);
+    transition: height 400ms var(--ease-out);
+  }
+  .day .bar > span.full {
+    background: var(--volt);
+  }
+  .day[aria-pressed="true"] {
+    border-color: var(--ink);
+    background: var(--ink);
+    color: var(--ground);
+  }
+  .day[aria-pressed="true"] .bar {
+    background: var(--hero-track);
+  }
+
+  /* ---------- habit card ---------- */
+  .habit {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    border-radius: 1.125rem;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    padding: 0.625rem 0.375rem 0.625rem 0.5rem;
+    color: var(--ink);
+    transition:
+      background-color 220ms var(--ease-out),
+      color 220ms var(--ease-out);
+  }
+  .habit .meta {
+    color: var(--muted);
+  }
+  .habit[data-done="true"] {
+    border-color: var(--done-bg);
+    background: var(--done-bg);
+    color: var(--done-fg);
+  }
+  .habit[data-done="true"] .meta {
+    color: var(--done-muted);
+  }
+  .habit[data-rest="true"] {
+    border-style: dashed;
+    border-color: var(--strong);
+    background: transparent;
+    color: var(--muted);
+  }
+  .habit[data-rest="true"] .tile {
+    background: var(--track) !important;
+    color: var(--muted);
+  }
+  .habit .step {
+    display: grid;
+    width: 2.75rem;
+    height: 2.75rem;
+    flex: none;
+    place-items: center;
+    border-radius: 9999px;
+    border: 1px solid color-mix(in oklab, currentColor 28%, transparent);
+    color: inherit;
+  }
+  .habit .step:hover:not(:disabled) {
+    background: color-mix(in oklab, currentColor 12%, transparent);
+  }
+  .habit .step:disabled {
+    opacity: 0.35;
+  }
+  .habit {
+    flex-wrap: wrap;
+  }
+  .habit .more {
+    display: grid;
+    width: 2.5rem;
+    height: 2.75rem;
+    flex: none;
+    place-items: center;
+    border-radius: 9999px;
+    color: inherit;
+  }
+  .habit .more:hover {
+    background: color-mix(in oklab, currentColor 12%, transparent);
+  }
+
+  /* the tick: ticking a habit fills the circle volt and draws the check */
+  .check-box {
+    display: grid;
+    width: 1.875rem;
+    height: 1.875rem;
+    place-items: center;
+    border-radius: 9999px;
+    border: 2px solid var(--ring);
+    color: var(--on-volt);
+    transition:
+      background-color 220ms var(--ease-out),
+      border-color 220ms var(--ease-out),
+      transform 220ms var(--ease-out);
+  }
+  .check-mark path {
+    stroke-dasharray: 24;
+    stroke-dashoffset: 24;
+    transition: stroke-dashoffset 300ms var(--ease-out) 70ms;
+  }
+  .check-input:hover ~ .check-box {
+    border-color: var(--ink);
+  }
+  .habit[data-done="true"] .check-input:hover ~ .check-box {
+    border-color: var(--volt);
+  }
+  .check-input:checked ~ .check-box {
+    background: var(--volt);
+    border-color: var(--volt);
+  }
+  .check-input:checked ~ .check-box .check-mark path {
+    stroke-dashoffset: 0;
+  }
+  .check-input:active ~ .check-box {
+    transform: scale(0.88);
+  }
+  .check-input:focus-visible ~ .check-box {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+  .habit[data-done="true"] .check-input:focus-visible ~ .check-box {
+    outline-color: var(--volt);
+  }
+  .habit[data-rest="true"] .check-box {
+    border-style: dashed;
+  }
+
+  /* a habit's last seven days as small squares */
+  .hist {
+    display: flex;
+    gap: 3px;
+  }
+  .hist > span {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+  }
+  .hist .miss {
+    background: var(--strong);
+  }
+  .habit[data-done="true"] .hist .miss {
+    background: var(--done-muted);
+    opacity: 0.55;
+  }
+  .hist .off {
+    border: 1px dashed var(--strong);
+  }
+  .hist .skip {
+    background: var(--track);
+    border: 1px solid var(--strong);
+  }
+  .hist .today {
+    border: 1.5px solid var(--hc);
+  }
+  .hist .hit {
+    background: var(--hc);
+  }
+
+  /* ---------- bottom navigation ---------- */
+  .nav {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 30;
+    margin-inline: auto;
+    display: grid;
+    max-width: 36rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    border-top: 1px solid var(--line);
+    background: var(--surface);
+    padding: 0.5rem 1rem calc(0.5rem + env(safe-area-inset-bottom));
+  }
+  .nav a {
+    display: flex;
+    min-height: 3.25rem;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-decoration: none;
+  }
+  .nav a > span {
+    border-radius: 9999px;
+    padding: 0.1875rem 1rem;
+    transition: background-color 180ms var(--ease-out);
+  }
+  .nav a:hover {
+    color: var(--ink);
+  }
+  .nav a[aria-current="page"] {
+    font-weight: 800;
+    color: var(--ink);
+  }
+  .nav a[aria-current="page"] > span {
+    background: var(--volt);
+    color: var(--on-volt);
+  }
+
+  /* ---------- progress ---------- */
+  .chart {
+    position: relative;
+    display: grid;
+    height: 9.375rem;
+    align-items: end;
+    border-bottom: 1px solid var(--line);
+    padding-top: 0.25rem;
+  }
+  .chart::before {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    top: 0.25rem;
+    border-top: 1px dashed var(--strong);
+  }
+  .chart > span {
+    min-height: 3px;
+    border-radius: 0.5rem 0.5rem 0.1875rem 0.1875rem;
+    background: var(--uv);
+    transition: height 400ms var(--ease-out);
+  }
+  .chart > span.full {
+    background: var(--volt);
+  }
+  .chart > span.empty {
+    background: var(--track);
+  }
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    border-radius: 1.25rem;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    padding: 0.875rem 1rem;
+  }
+  .stat.volt {
+    border-color: var(--volt);
+    background: var(--volt);
+    color: var(--on-volt);
+  }
+  .heat {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-template-rows: repeat(7, 1.3125rem);
+    grid-auto-flow: column;
+    gap: 4px;
+  }
+  .heat > span {
+    border-radius: 5px;
+  }
+  .heat .h0 {
+    background: var(--heat-0);
+  }
+  .heat .h1 {
+    background: var(--heat-1);
+  }
+  .heat .h2 {
+    background: var(--heat-2);
+  }
+  .heat .h3 {
+    background: var(--heat-3);
+  }
+  .heat .before {
+    border: 1px dashed var(--strong);
+  }
+  .heat .future {
+    border: 1px solid var(--line);
+  }
+  .rank {
+    display: flex;
+    min-height: 3.625rem;
+    align-items: center;
+    gap: 0.625rem;
+    border-top: 1px solid var(--line);
+    padding-inline: 0.25rem;
+    color: inherit;
+    text-decoration: none;
+  }
+  .rank:first-child {
+    border-top: 0;
+  }
+  .rank:hover {
+    color: inherit;
+  }
+  .meter {
+    height: 0.375rem;
+    overflow: hidden;
+    border-radius: 9999px;
+    background: var(--track);
+  }
+  .meter > span {
+    display: block;
+    height: 100%;
+    border-radius: 9999px;
+    background: var(--ink);
+    transition: width 400ms var(--ease-out);
+  }
+  /* ---------- habit detail calendar ---------- */
+  .cal {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0.375rem;
+  }
+  .cal > span,
+  .cal > button {
+    position: relative;
+    display: grid;
+    height: 2.5rem;
+    place-items: center;
+    border-radius: 9999px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+  }
+  .cal .hit {
+    background: var(--volt);
+    color: var(--on-volt);
+    font-weight: 800;
+  }
+  .cal .miss {
+    border: 1.5px solid var(--danger-line);
+    color: var(--danger);
+    font-weight: 700;
+  }
+  .cal .skip {
+    border: 1.5px dashed var(--strong);
+    color: var(--muted);
+    font-weight: 700;
+  }
+  .cal .off {
+    background: var(--track);
+    color: var(--muted);
+  }
+  .cal > button {
+    cursor: pointer;
+    color: inherit;
+  }
+  .cal > button:hover:not(.hit):not(:disabled) {
+    background: var(--track);
+  }
+  .cal > button:disabled {
+    cursor: default;
+  }
+  /* a small tag pinned on the top border of a day that has a note, half outside the pill */
+  .cal .note-mark {
+    position: absolute;
+    top: -7px;
+    right: 12px;
+    display: grid;
+    width: 0.9375rem;
+    height: 0.9375rem;
+    place-items: center;
+    border-radius: 9999px;
+    background: var(--uv);
+    color: var(--ground);
+    box-shadow: 0 0 0 2px var(--surface);
+  }
+  .cal .future {
+    color: var(--strong);
+  }
+  .cal .today {
+    box-shadow: inset 0 0 0 2px var(--ink);
+  }
+
+  /* ---------- dialogs: bottom sheets and the full-screen editor ---------- */
+  dialog.sheet,
+  dialog.fullscreen {
+    color: var(--ink);
+    background: var(--ground);
+    border: 0;
+    padding: 0;
+  }
+  dialog.sheet {
+    width: min(100%, 36rem);
+    max-width: 36rem;
+    max-height: 92dvh;
+    margin: auto auto 0;
+    overflow-y: auto;
+    border-radius: 1.75rem 1.75rem 0 0;
+  }
+  dialog.fullscreen {
+    width: 100%;
+    max-width: 36rem;
+    height: 100dvh;
+    max-height: 100dvh;
+    margin: 0 auto;
+    overflow-y: auto;
+  }
+  dialog.sheet::backdrop,
+  dialog.fullscreen::backdrop {
+    background: rgba(14, 17, 17, 0.6);
+  }
+  dialog.sheet[open] {
+    animation: sheet-up 260ms var(--ease-out);
+  }
+  @keyframes sheet-up {
+    from {
+      transform: translateY(2rem);
+      opacity: 0;
+    }
+  }
+  .grabber {
+    width: 2.5rem;
+    height: 0.3125rem;
+    align-self: center;
+    border-radius: 9999px;
+    background: var(--strong);
+  }
+
+  /* new/edit habit pickers */
+  .swatch {
+    display: grid;
+    height: 2.875rem;
+    place-items: center;
+    border-radius: 0.875rem;
+    color: #0e1111;
+    transition: transform 150ms var(--ease-out);
+  }
+  .swatch:active {
+    transform: scale(0.94);
+  }
+  /* the check sits on a small disc so it shows on both halves */
+  .swatch-pair svg {
+    box-sizing: content-box;
+    border-radius: 9999px;
+    background: var(--ground);
+    color: var(--ink);
+    padding: 3px;
+  }
+  .swatch-pair {
+    --sw-partner: var(--sw-l);
+    background: linear-gradient(135deg, var(--sw-main) 50%, var(--sw-partner) 50%);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .swatch-pair {
+      --sw-partner: var(--sw-d);
+    }
+  }
+  :root[data-theme="dark"] .swatch-pair {
+    --sw-partner: var(--sw-d);
+  }
+  .swatch[aria-pressed="true"] {
+    box-shadow:
+      0 0 0 3px var(--ground),
+      0 0 0 5px var(--ink);
+  }
+  .swatch svg {
+    opacity: 0;
+  }
+  .swatch[aria-pressed="true"] svg {
+    opacity: 1;
+  }
+  .icon-pick {
+    display: grid;
+    height: 3.125rem;
+    place-items: center;
+    border-radius: 0.875rem;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+    transition: background-color 150ms;
+  }
+  .icon-pick:hover {
+    background: var(--track);
+  }
+  .icon-pick[aria-pressed="true"] {
+    border: 2px solid var(--ink);
+    background: var(--hc);
+    color: #0e1111;
+  }
+  .dow {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0.375rem;
+  }
+  .dow button {
+    height: 2.75rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--strong);
+    background: transparent;
+    font-weight: 800;
+    color: var(--ink);
+    transition: background-color 150ms;
+  }
+  .dow button[aria-pressed="true"] {
+    border-color: var(--volt);
+    background: var(--volt);
+    color: var(--on-volt);
+  }
+  .chip {
+    display: inline-flex;
+    min-height: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    border-radius: 9999px;
+    border: 1px solid var(--strong);
+    background: var(--surface);
+    padding-inline: 0.875rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--ink);
+    transition: background-color 150ms;
+  }
+  .chip:hover:not(:disabled) {
+    background: var(--track);
+  }
+  .chip:disabled {
+    opacity: 0.5;
+  }
+  .chip[aria-pressed="true"] {
+    border-color: var(--ink);
+    background: var(--ink);
+    color: var(--ground);
+  }
+
+  /* share sheet options */
+  .opt {
+    height: 2.5rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--strong);
+    background: transparent;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--ink);
+    transition: background-color 150ms;
+  }
+  .opt:hover {
+    background: var(--track);
+  }
+  .opt[aria-pressed="true"] {
+    border: 2px solid var(--ink);
+    background: var(--surface);
+    font-weight: 700;
+  }
+  .round-pick {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 9999px;
+    border: 1px solid var(--strong);
+  }
+  .round-pick[aria-pressed="true"] {
+    box-shadow:
+      0 0 0 2px var(--ground),
+      0 0 0 4px var(--ink);
+  }
+
+  /* ---------- toast and loading ---------- */
+  .toast {
+    position: fixed;
+    inset-inline: 1rem;
+    bottom: calc(5.5rem + env(safe-area-inset-bottom));
+    z-index: 40;
+    margin-inline: auto;
+    display: flex;
+    max-width: 34rem;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    border-radius: 1rem;
+    background: var(--ink);
+    padding: 0.625rem 0.625rem 0.625rem 1rem;
+    color: var(--ground);
+    box-shadow: 0 8px 24px rgba(14, 17, 17, 0.25);
+    animation: sheet-up 260ms var(--ease-out);
+  }
+  .skeleton {
+    border-radius: 1.125rem;
+    background: var(--track);
+    animation: skeleton-pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes skeleton-pulse {
+    50% {
+      opacity: 0.5;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+}
