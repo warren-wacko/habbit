@@ -1,5 +1,7 @@
 "use client";
 
+import { scoreFontPx } from "@/lib/score";
+
 const RADIUS = 52;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
@@ -19,6 +21,7 @@ export function ScoreCard({
   best: number;
   weekRate: number | null;
 }) {
+  const score = `${done}/${total}`;
   const progress = total ? done / total : 0;
   const perfect = total > 0 && done === total;
 
@@ -56,8 +59,9 @@ export function ScoreCard({
           )}
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="display num text-[2rem]">
-            {done}/{total}
+          {/* sized to the text, so a long score such as 10/10 stays inside the ring */}
+          <span className="display num leading-none" style={{ fontSize: scoreFontPx(score) }}>
+            {score}
           </span>
           <span className="caps lbl">Done</span>
         </div>
