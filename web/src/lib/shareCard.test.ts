@@ -1,6 +1,15 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { placeSections, SHARE_LAYOUTS } from "./shareCard";
+import { fitFontSize, placeSections, SHARE_LAYOUTS } from "./shareCard";
+
+test("text that already fits keeps its size, and text that is too wide shrinks to fit", () => {
+  assert.equal(fitFontSize(100, 300, 400), 100);
+  assert.equal(fitFontSize(100, 400, 400), 100);
+  assert.equal(fitFontSize(100, 800, 400), 50);
+  assert.ok(fitFontSize(168, 700, 386) * (700 / 168) <= 386, "the result is never wider than the limit");
+  assert.equal(fitFontSize(100, 0, 400), 100, "empty text is left alone");
+  assert.equal(fitFontSize(100, 800, 0), 1, "never reaches zero or below");
+});
 
 test("sections are spread out and centred in the space they have", () => {
   // two 100px sections in 500px with a gap of at most 80: gap 80, block 280 tall, centred

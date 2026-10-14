@@ -195,6 +195,15 @@ function width(ctx: CanvasRenderingContext2D, s: string, font: string, spacing =
   return w;
 }
 
+/**
+ * The font size to draw text at so it is no wider than `maxWidth`: `size` when it already fits,
+ * smaller when it does not. `measuredWidth` is how wide the text is at `size`.
+ */
+export function fitFontSize(size: number, measuredWidth: number, maxWidth: number): number {
+  if (measuredWidth <= maxWidth || measuredWidth <= 0) return size;
+  return Math.max(1, Math.floor((size * maxWidth) / measuredWidth));
+}
+
 // small spaced-out capitals, drawn from the top of the text
 function caps(
   s: Scene,
@@ -420,8 +429,10 @@ function layoutChecklist(s: Scene) {
     const label = "PERFECT DAY";
     const lf = body(800, pick(30, 24), s.F);
     const tw = width(ctx, label, lf, 4);
-    const ph = pick(62, 48);
-    const py = yHead + headH - ph;
+    const ph = pick(48, 38);
+    // level with the "Done today" label, top right: that row is short, so the pill can never
+    // reach the big number below it (beside the number there is no room for a long total)
+    const py = yHead + labelSize * 0.4 - ph / 2;
     ctx.fillStyle = p.perfect;
     roundRect(ctx, s.W - s.pad - tw - 56, py, tw + 56, ph, ph / 2);
     ctx.fill();
@@ -536,7 +547,11 @@ function layoutRing(s: Scene) {
     ctx.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * progress);
     ctx.stroke();
   }
-  big(s, `${data.done}/${data.total}`, cx, cy - D * 0.15, D * 0.28, p.fg, "center");
+  // a long total such as 10/10 must stay inside the ring, so it shrinks to fit (3/3 does not)
+  const score = `${data.done}/${data.total}`;
+  const baseSize = D * 0.28;
+  const scoreSize = fitFontSize(baseSize, width(ctx, score, display(baseSize, s.F)), (D - stroke * 2) * 0.84);
+  big(s, score, cx, cy - D * 0.15 + (baseSize - scoreSize) * 0.38, scoreSize, p.fg, "center");
   caps(s, "done", cx, cy + D * 0.13, pick(30, 22), p.muted, "center");
   if (perfect) {
     const label = "PERFECT DAY";
